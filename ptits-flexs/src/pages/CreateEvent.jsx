@@ -3,13 +3,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import { supabase } from "@/lib/supabaseClient";
 
 const CreateEventPage = () => {
   const [title, setTitle] = useState("");
-  const [date, setDate] = useState(null);
+  const [date, setDate] = useState(""); // date est une string YYYY-MM-DD
   const [time, setTime] = useState("");
   const [description, setDescription] = useState("");
 
@@ -19,7 +17,7 @@ const CreateEventPage = () => {
     const { data, error } = await supabase.from("event").insert([
       {
         nom: title,
-        dateDebut: date?.toISOString().split("T")[0],
+        dateDebut: date, // ✅ plus besoin de .toISOString()
         heure: time,
         lieu: description || "Non spécifié"
       }
@@ -31,7 +29,7 @@ const CreateEventPage = () => {
     } else {
       alert("Événement créé !");
       setTitle("");
-      setDate(null);
+      setDate("");
       setTime("");
       setDescription("");
     }
@@ -57,19 +55,11 @@ const CreateEventPage = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Date</label>
             <Calendar
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              className="rounded-md border"
-              locale={fr}
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              label="Date"
             />
-            {date && (
-              <p className="text-sm text-gray-600 mt-1">
-                Date choisie : {format(date, "PPP", { locale: fr })}
-              </p>
-            )}
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Heure</label>
