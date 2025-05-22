@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+/* Customiser l'overlay du Dialog */
+[data-state="open"] > div[data-radix-dialog-overlay] {
+  background-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(4px);
+}
