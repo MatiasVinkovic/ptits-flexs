@@ -101,7 +101,7 @@ export default function RemboursementPage() {
             className="border rounded px-2 py-1 w-full"
             required
           >
-            <option value="">-- Choisir un utilisateur --</option>
+            <option value="">-- Choisir une personne --</option>
             {users.map((u) => (
               <option key={u.id} value={u.id}>
                 {u.username}
