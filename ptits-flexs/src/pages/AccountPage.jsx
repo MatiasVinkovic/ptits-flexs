@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 export default function AccountPage() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
@@ -44,18 +45,44 @@ export default function AccountPage() {
   const handleUpdate = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setMessage("");
 
     const {
-      data: { user }
+      data: { user },
+      error: userError
     } = await supabase.auth.getUser();
 
-    const { error } = await supabase
+    if (userError || !user) {
+      setMessage("Utilisateur non connecté.");
+      setLoading(false);
+      return;
+    }
+
+    // Mise à jour du nom d'utilisateur
+    const { error: usernameError } = await supabase
       .from("users_public")
       .update({ username })
       .eq("id", user.id);
 
+    // Mise à jour du mot de passe si rempli
+    let passwordError = null;
+    if (newPassword) {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+      passwordError = error;
+    }
+
     setLoading(false);
-    setMessage(error ? error.message : "Nom d'utilisateur mis à jour ✔️");
+
+    if (usernameError || passwordError) {
+      setMessage(
+        `${usernameError?.message || ""} ${passwordError?.message || ""}`.trim()
+      );
+    } else {
+      setMessage("Profil mis à jour ✔️");
+      setNewPassword(""); // vider le champ
+    }
   };
 
   return (
@@ -80,11 +107,23 @@ export default function AccountPage() {
           />
         </div>
 
+        <div>
+          <label className="block text-sm mb-1">Nouveau mot de passe</label>
+          <Input
+            type="password"
+            placeholder="Laisser vide pour ne pas changer"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+        </div>
+
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? "Chargement..." : "Enregistrer"}
         </Button>
 
-        {message && <p className="text-center text-sm text-gray-600">{message}</p>}
+        {message && (
+          <p className="text-center text-sm text-gray-600">{message}</p>
+        )}
       </form>
     </main>
   );

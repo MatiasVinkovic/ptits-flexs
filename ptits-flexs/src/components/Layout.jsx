@@ -44,6 +44,7 @@ export default function Layout({ children }) {
     { href: "/event", label: "Les évènements" },
     ...(isLoggedIn ? [{ href: "/remboursement", label: "Les remboursements" }] : []),
     ...(!isLoggedIn ? [{ href: "/login", label: "Connexion" }] : []),
+    ...(isLoggedIn ? [{ href: "/annuaire", label: "Annuaire" }] : []),
     ...(isLoggedIn ? [{ href: "/account", label: "Compte" }] : [])
   ];
 

@@ -6,6 +6,7 @@ import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
 import AccountPage from "./pages/AccountPage";
 import RemboursementPage from "./pages/RemboursementPage";
+import AnnuairePage from "./pages/AnnuairePage";
 
 
 function App() {
@@ -21,6 +22,8 @@ function App() {
         <Route path="/account" element={<AccountPage />} />
 
         <Route path="/remboursement" element={<RemboursementPage />} />
+
+        <Route path="/annuaire" element={<AnnuairePage />} />
 
 
 
