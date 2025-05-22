@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -6,50 +6,58 @@ import { Button } from "@/components/ui/button";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [mode, setMode] = useState("login"); // ou "signup"
   const [message, setMessage] = useState("");
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      setMessage("Erreur : " + error.message);
+  const handleAuth = async () => {
+    let result;
+    if (mode === "login") {
+      result = await supabase.auth.signInWithPassword({ email, password });
     } else {
-      setMessage("Connexion réussie !");
-        window.location.href = "/";
-      // Tu peux rediriger ici avec React Router ou autre
+      result = await supabase.auth.signUp({ email, password });
+    }
+
+    if (result.error) {
+      setMessage("❌ " + result.error.message);
+    } else {
+      setMessage("✅ Connecté avec succès !");
+      // Rediriger ou faire autre chose après la connexion
+      window.location.href = "/";
     }
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
-      <form
-        onSubmit={handleLogin}
-        className="w-full max-w-md bg-white rounded-xl shadow-md p-6 space-y-4"
-      >
-        <h1 className="text-2xl font-bold text-center">Connexion</h1>
-        <Input
-          type="email"
-          placeholder="Adresse e-mail"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <Input
-          type="password"
-          placeholder="Mot de passe"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <Button type="submit" className="w-full">
-          Se connecter
-        </Button>
-        {message && <p className="text-sm text-center text-gray-600">{message}</p>}
-      </form>
-    </main>
+    <div className="max-w-md mx-auto mt-10 bg-white p-6 rounded-lg shadow">
+      <h1 className="text-xl font-bold mb-4 text-center">
+        {mode === "login" ? "Connexion" : "Créer un compte"}
+      </h1>
+      <Input
+        type="email"
+        placeholder="Email"
+        className="mb-2"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <Input
+        type="password"
+        placeholder="Mot de passe"
+        className="mb-4"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <Button onClick={handleAuth} className="w-full">
+        {mode === "login" ? "Se connecter" : "S'inscrire"}
+      </Button>
+      <p className="mt-4 text-sm text-gray-600 text-center">
+        {mode === "login" ? "Pas encore de compte ?" : "Déjà inscrit ?"}{" "}
+        <button
+          className="text-blue-600 hover:underline"
+          onClick={() => setMode(mode === "login" ? "signup" : "login")}
+        >
+          {mode === "login" ? "Créer un compte" : "Se connecter"}
+        </button>
+      </p>
+      {message && <p className="text-center mt-4">{message}</p>}
+    </div>
   );
 }

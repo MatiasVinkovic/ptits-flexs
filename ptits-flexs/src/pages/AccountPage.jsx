@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 export default function AccountPage() {
   const [email, setEmail] = useState("");
-  const [displayName, setDisplayName] = useState("");
+  const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
@@ -23,17 +23,17 @@ export default function AccountPage() {
         return;
       }
 
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("display_name")
+      const { data, error } = await supabase
+        .from("users_public")
+        .select("username")
         .eq("id", user.id)
         .single();
 
-      if (profileError) {
+      if (error) {
         setMessage("Erreur lors du chargement du profil.");
       } else {
         setEmail(user.email);
-        setDisplayName(profile?.display_name || "");
+        setUsername(data?.username || "");
       }
       setLoading(false);
     };
@@ -49,13 +49,13 @@ export default function AccountPage() {
       data: { user }
     } = await supabase.auth.getUser();
 
-    const { error } = await supabase.from("profiles").upsert({
-      id: user.id,
-      display_name: displayName
-    });
+    const { error } = await supabase
+      .from("users_public")
+      .update({ username })
+      .eq("id", user.id);
 
     setLoading(false);
-    setMessage(error ? error.message : "Profil mis à jour ✔️");
+    setMessage(error ? error.message : "Nom d'utilisateur mis à jour ✔️");
   };
 
   return (
@@ -75,8 +75,8 @@ export default function AccountPage() {
           <label className="block text-sm mb-1">Nom affiché</label>
           <Input
             type="text"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
         </div>
 

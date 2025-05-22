@@ -16,18 +16,30 @@ export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userName, setUserName] = useState(null);
 
-  useEffect(() => {
+useEffect(() => {
   const fetchData = async () => {
-    // Récupérer l'utilisateur connecté
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    if (userError) {
-      console.error("Erreur récupération utilisateur :", userError.message);
-    } else {
-      const displayName = userData.user?.user_metadata?.display_name;
-      setUserName(displayName || userData.user?.email); // fallback sur email si pas de nom
+    // 🔐 Récupérer l'utilisateur connecté
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      console.error("Erreur récupération utilisateur :", userError?.message || "Utilisateur non trouvé");
+      return;
     }
 
-    // Récupérer les données de la table 'test'
+    // 👤 Récupérer le username depuis users_public
+    const { data: userPublic, error: publicError } = await supabase
+      .from("users_public")
+      .select("username")
+      .eq("id", user.id)
+      .single();
+
+    if (publicError) {
+      console.error("Erreur récupération username :", publicError.message);
+      setUserName(user.email); // fallback email
+    } else {
+      setUserName(userPublic?.username || user.email);
+    }
+
+    // 📄 Récupérer la table test
     const { data, error } = await supabase.from("test").select("*");
     if (error) {
       console.error("Erreur Supabase :", error.message);
@@ -101,6 +113,7 @@ const handleLogout = async () => {
           <a href="#" onClick={() => setMenuOpen(false)}>Accueil</a>
           <a href="createevent" onClick={() => setMenuOpen(false)}>Créer un événement</a>
           <a href="event" onClick={() => setMenuOpen(false)}>Les évènements</a>
+          <a href="remboursement" onClick={() => setMenuOpen(false)}>Les remboursements</a>
           <a href="login" onClick={() => setMenuOpen(false)}>Connexion</a>
 
           <a href="account" onClick={() => setMenuOpen(false)}>Compte</a>

@@ -5,6 +5,7 @@ import EventPage from "./pages/EventPage";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
 import AccountPage from "./pages/AccountPage";
+import RemboursementPage from "./pages/RemboursementPage";
 
 
 function App() {
@@ -18,6 +19,9 @@ function App() {
 
         <Route path="/login" element={<LoginPage />} />
         <Route path="/account" element={<AccountPage />} />
+
+        <Route path="/remboursement" element={<RemboursementPage />} />
+
 
 
         {/* Tu pourras ajouter d’autres routes ici plus tard */}
