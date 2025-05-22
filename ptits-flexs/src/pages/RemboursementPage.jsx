@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import Layout from "@/components/Layout";
 
 export default function RemboursementPage() {
   const [montant, setMontant] = useState("");
@@ -13,6 +15,7 @@ export default function RemboursementPage() {
   const [me, setMe] = useState(null);
   const [totalMeDoit, setTotalMeDoit] = useState(0);
   const [totalJeDois, setTotalJeDois] = useState(0);
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,10 +68,11 @@ export default function RemboursementPage() {
       },
     ]);
     if (error) {
-      alert("Erreur lors de l'ajout du remboursement");
+      toast.error("Erreur lors de l'ajout du remboursement");
       console.error(error);
     } else {
-      alert("Remboursement ajouté !");
+      toast.success("Remboursement ajouté avec succès");
+      
       setMontant("");
       setFromUser("");
       setDescription("");
@@ -83,22 +87,28 @@ export default function RemboursementPage() {
       .eq("id", id);
 
     if (error) {
-      alert("Erreur lors de la mise à jour du remboursement");
+    
+      toast.error("Erreur lors de la mise à jour du remboursement");
     } else {
+      
+      toast.success("Remboursement marqué comme remboursé");
       window.location.reload();
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Déclarer un remboursement</h1>
-      <form onSubmit={handleSubmit} className="space-y-4 mb-8">
+    
+    <div className="max-w-2xl mx-auto p-6 space-y-6 animate-fade-in">
+    <Layout>
+      <h1 className="text-4xl font-bold text-center text-indigo-700 mb-8 animate-bounce-in">Quoi me doit de la thune ?</h1>
+
+      <form onSubmit={handleSubmit} className="space-y-4 bg-white p-4 rounded-xl shadow">
         <div>
           <label className="block mb-1 text-sm font-medium">Qui te doit ?</label>
           <select
             value={fromUser}
             onChange={(e) => setFromUser(e.target.value)}
-            className="border rounded px-2 py-1 w-full"
+            className="border rounded px-3 py-2 w-full"
             required
           >
             <option value="">-- Choisir une personne --</option>
@@ -126,13 +136,17 @@ export default function RemboursementPage() {
             placeholder="Ex: Courses, resto..."
           />
         </div>
-        <Button type="submit">Ajouter</Button>
+        <div className="flex justify-center">
+          <Button type="submit" className="bg-black text-white px-6 py-2 rounded-lg shadow">
+            Donne l'argent !
+          </Button>
+        </div>
       </form>
 
-      <div className="mb-6">
-        <p className="text-green-700 font-medium">On te doit : {totalMeDoit.toFixed(2)} €</p>
-        <p className="text-red-700 font-medium">Tu dois : {totalJeDois.toFixed(2)} €</p>
-        <p className="font-semibold mt-1">
+      <div className="text-center bg-gray-50 py-6 rounded-lg shadow-md">
+        <p className="text-green-600 text-xl font-semibold">On te doit : {totalMeDoit.toFixed(2)} €</p>
+        <p className="text-red-600 text-xl font-semibold">Tu dois : {totalJeDois.toFixed(2)} €</p>
+        <p className="text-2xl font-bold mt-2">
           Solde net : {(totalMeDoit - totalJeDois).toFixed(2)} €
         </p>
       </div>
@@ -140,7 +154,7 @@ export default function RemboursementPage() {
       <h2 className="text-xl font-semibold mb-2">Mes remboursements</h2>
       <ul className="space-y-2">
         {remboursements.map((r) => (
-          <li key={r.id} className="border rounded p-3">
+          <li key={r.id} className="bg-white rounded-xl shadow p-4">
             <p>
               <strong>
                 {r.to_user === me.id
@@ -165,6 +179,17 @@ export default function RemboursementPage() {
           </li>
         ))}
       </ul>
+
+      <style>{`
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.5s ease-out;
+        }
+      `}</style>
+      </Layout>
     </div>
   );
 }

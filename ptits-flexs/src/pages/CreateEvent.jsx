@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabaseClient";
+import Layout from "@/components/Layout";
 
 const CreateEventPage = () => {
   const [title, setTitle] = useState("");
@@ -17,7 +18,7 @@ const CreateEventPage = () => {
     const { data, error } = await supabase.from("event").insert([
       {
         nom: title,
-        dateDebut: date, // ✅ plus besoin de .toISOString()
+        dateDebut: date,
         heure: time,
         lieu: description || "Non spécifié"
       }
@@ -36,17 +37,18 @@ const CreateEventPage = () => {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center py-10 px-4 animate-fade-in">
-      <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-6 space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">Créer un événement</h1>
-          <p className="text-sm text-gray-500">
+    <main className="min-h-screen bg-gradient-to-br from-indigo-50 to-white flex items-center justify-center py-10 px-4 animate-fade-in">
+      <Layout>
+      <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 space-y-6 animate-pop-in">
+        <div className="text-center">
+          <h1 className="text-3xl font-extrabold text-indigo-700 mb-2">Créer un événement</h1>
+          <p className="text-sm text-gray-500 font-light">
             Renseigne les informations de l'événement à venir
           </p>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium mb-1">Titre</label>
+            <label className="block text-sm font-semibold mb-1 text-gray-700">Titre</label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -62,7 +64,7 @@ const CreateEventPage = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Heure</label>
+            <label className="block text-sm font-semibold mb-1 text-gray-700">Heure</label>
             <Input
               type="time"
               value={time}
@@ -71,7 +73,7 @@ const CreateEventPage = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Lieu</label>
+            <label className="block text-sm font-semibold mb-1 text-gray-700">Lieu</label>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -79,20 +81,29 @@ const CreateEventPage = () => {
               placeholder="Lieu de l'événement"
             />
           </div>
-          <Button type="submit" className="w-full">
-            Créer l'événement
-          </Button>
+          <div className="flex justify-center">
+            <Button
+              type="submit"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg shadow transition"
+            >
+              Créer l'événement
+            </Button>
+          </div>
         </form>
       </div>
       <style>{`
         @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
+          from { opacity: 0; transform: translateY(16px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-        .animate-fade-in {
-          animation: fade-in 0.8s ease;
+        @keyframes pop-in {
+          from { opacity: 0; transform: scale(0.9); }
+          to { opacity: 1; transform: scale(1); }
         }
+        .animate-fade-in { animation: fade-in 0.6s ease-out; }
+        .animate-pop-in { animation: pop-in 0.5s ease-out; }
       `}</style>
+      </Layout>
     </main>
   );
 };

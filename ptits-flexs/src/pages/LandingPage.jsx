@@ -1,166 +1,142 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-
+import Layout from "@/components/Layout";
+import { format, parseISO, isAfter } from "date-fns";
+import { fr } from "date-fns/locale";
 
 export default function LandingPage() {
-  const [data, setData] = useState([]);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [userName, setUserName] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [totalMeDoit, setTotalMeDoit] = useState(0);
+  const [totalJeDois, setTotalJeDois] = useState(0);
 
-useEffect(() => {
-  const fetchData = async () => {
-    // 🔐 Récupérer l'utilisateur connecté
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      console.error("Erreur récupération utilisateur :", userError?.message || "Utilisateur non trouvé");
-      return;
-    }
+  useEffect(() => {
+    const fetchAll = async () => {
+      const {
+        data: { user },
+        error: userError
+      } = await supabase.auth.getUser();
+      if (!user || userError) return;
 
-    // 👤 Récupérer le username depuis users_public
-    const { data: userPublic, error: publicError } = await supabase
-      .from("users_public")
-      .select("username")
-      .eq("id", user.id)
-      .single();
+      setIsLoggedIn(true);
 
-    if (publicError) {
-      console.error("Erreur récupération username :", publicError.message);
-      setUserName(user.email); // fallback email
-    } else {
-      setUserName(userPublic?.username || user.email);
-    }
+      const { data: publicUser } = await supabase
+        .from("users_public")
+        .select("username")
+        .eq("id", user.id)
+        .single();
+      setUserName(publicUser?.username || user.email);
 
-    // 📄 Récupérer la table test
-    const { data, error } = await supabase.from("test").select("*");
-    if (error) {
-      console.error("Erreur Supabase :", error.message);
-    } else {
-      setData(data);
-    }
-  };
+      const { data: events } = await supabase
+        .from("event")
+        .select("*")
+        .order("dateDebut", { ascending: true });
 
-  fetchData();
-}, []);
+      const now = new Date();
+      setUpcomingEvents(events.filter(e => isAfter(parseISO(e.dateDebut), now)));
 
-const handleLogout = async () => {
-  const { error } = await supabase.auth.signOut();
-  if (error) {
-    console.error("Erreur de déconnexion :", error.message);
-  } else {
-    window.location.reload(); // ou redirige vers /login
-  }
-};
+      const { data: remboursements } = await supabase
+        .from("remboursement")
+        .select("*")
+        .or(`from_user.eq.${user.id},to_user.eq.${user.id}`);
+
+      const totalDu = remboursements
+        .filter((r) => r.to_user === user.id && r.status !== "remboursé")
+        .reduce((sum, r) => sum + parseFloat(r.montant), 0);
+      const totalDoi = remboursements
+        .filter((r) => r.from_user === user.id && r.status !== "remboursé")
+        .reduce((sum, r) => sum + parseFloat(r.montant), 0);
+
+      setTotalMeDoit(totalDu);
+      setTotalJeDois(totalDoi);
+    };
+
+    fetchAll();
+  }, []);
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4 relative overflow-x-hidden">
-      
-      {/* Tabs bar - déplacer ici pour qu'elle soit tout en haut */}
-      <nav className="w-full max-w-md mx-auto mb-6 animate-fade-in rounded-3xl shadow-lg bg-white/90 backdrop-blur-md p-2 sticky top-0 z-10">
+    <Layout>
+      <div className="space-y-8 animate-fade-in">
+        <header className="text-center py-8">
+          <h1 className="text-5xl font-extrabold text-indigo-700 animate-bounce-in">
+            Ptits Flexs
+          </h1>
+          <p className="text-lg text-gray-600 mt-2 animate-slide-in">
+            Nathéo n'aura plus aucune excuse
+          </p>
+        </header>
+
         {userName && (
-            <h1 className="text-2xl font-bold text-center mt-4">
-              Bienvenue {userName}
-            </h1>
-          )}
-          <Tabs defaultValue="account" className="w-full">
-          <TabsList className="w-full flex justify-between">
-            <TabsTrigger value="account" className="flex-1">Account</TabsTrigger>
-            <TabsTrigger value="password" className="flex-1">Password</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="account">
-            {/* Hero */}
-            <header className="w-full max-w-md text-center mb-8 animate-fade-in rounded-3xl shadow-lg bg-white p-6">
-              <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-2 drop-shadow-sm animate-bounce-in">
-                Ptits Flexs
-              </h1>
-              <p className="text-lg md:text-xl text-gray-600 mb-4 font-light animate-slide-in">
-                Organise tes événements entre potes, facilement et avec style.
+          <div className="text-center">
+            <h2 className="text-xl font-semibold">Bienvenue {userName} 👋</h2>
+            <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-center items-center">
+              <div className="rounded-full bg-green-100 border border-green-400 px-4 py-2 shadow text-green-700 flex flex-col items-center min-w-[110px]">
+                <span className="font-semibold text-xs">On te doit</span>
+                <span className="text-lg font-bold">{totalMeDoit.toFixed(2)} €</span>
+              </div>
+              <div className="rounded-full bg-red-100 border border-red-400 px-4 py-2 shadow text-red-700 flex flex-col items-center min-w-[110px]">
+                <span className="font-semibold text-xs">Tu dois</span>
+                <span className="text-lg font-bold">{totalJeDois.toFixed(2)} €</span>
+              </div>
+            </div>
+            <div className="mt-2">
+              <p className="text-lg font-bold">
+                Solde net : {(totalMeDoit - totalJeDois).toFixed(2)} €
               </p>
-              <button className="mt-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-base rounded-full shadow hover:shadow-md transition-all duration-300 animate-pop-in">
-                Créer ou rejoindre un événement
-              </button>
-            </header>
-          </TabsContent>
-        </Tabs>
-      </nav>
+            </div>
+          </div>
+        )}
 
-      {/* Menu burger animé */}
-      <button
-        onClick={() => setMenuOpen(!menuOpen)}
-        className="absolute top-4 right-4 z-30 flex flex-col items-center justify-center w-10 h-10 bg-white/80 rounded-full shadow-md md:hidden transition-transform"
-        aria-label="Menu"
-      >
-        <div
-          className={`w-6 h-0.5 bg-black transition-transform duration-300 ${menuOpen ? "rotate-45 translate-y-1.5" : "mb-1"}`}
-        />
-        <div
-          className={`w-6 h-0.5 bg-black transition-transform duration-300 ${menuOpen ? "-rotate-45 -translate-y-1.5" : "mt-1"}`}
-        />
-      </button>
+        <section className="bg-white rounded-xl shadow-lg p-6">
+          <h2 className="text-2xl font-bold mb-4 text-indigo-600">Prochains événements</h2>
+          <ul className="space-y-3">
+            {upcomingEvents.length === 0 ? (
+              <li className="text-gray-500 italic">Aucun événement prévu pour l'instant...</li>
+            ) : (
+              upcomingEvents.map((event) => (
+                <li
+                  key={event.id}
+                  className="p-4 bg-gray-50 rounded-lg shadow hover:shadow-md transition-all animate-fade-in-up"
+                >
+                  <h3 className="text-lg font-semibold text-gray-800">{event.nom}</h3>
+                  <p className="text-sm text-gray-600">
+                    {format(parseISO(event.dateDebut), "eeee d MMMM yyyy", { locale: fr })} à {event.heure}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">{event.lieu}</p>
+                </li>
+              ))
+            )}
+          </ul>
+        </section>
 
-      {/* Menu plein écran */}
-      {menuOpen && (
-        <div className="fixed inset-0 z-20 bg-white/95 backdrop-blur-md flex flex-col items-center justify-center space-y-8 text-2xl font-semibold text-gray-800 animate-fade-in-fast">
-          <a href="#" onClick={() => setMenuOpen(false)}>Accueil</a>
-          <a href="createevent" onClick={() => setMenuOpen(false)}>Créer un événement</a>
-          <a href="event" onClick={() => setMenuOpen(false)}>Les évènements</a>
-          <a href="remboursement" onClick={() => setMenuOpen(false)}>Les remboursements</a>
-          <a href="login" onClick={() => setMenuOpen(false)}>Connexion</a>
+        <style>{`
+          @keyframes fade-in {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fade-in { animation: fade-in 0.5s ease-out; }
 
-          <a href="account" onClick={() => setMenuOpen(false)}>Compte</a>
-          <button
-            onClick={() => {
-              setMenuOpen(false);
-              handleLogout();
-            }}
-            className="text-red-500 underline"
-          >
-            Se déconnecter
-          </button>
-          <a href="register" onClick={() => setMenuOpen(false)}>Créer un compte</a>
+          @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fade-in-up { animation: fade-in-up 0.4s ease-out; }
 
-        </div>
-      )}
+          @keyframes bounce-in {
+            0% { transform: scale(0.8); opacity: 0; }
+            60% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+          }
+          .animate-bounce-in { animation: bounce-in 0.6s ease; }
 
-      <section className="w-full max-w-md bg-white rounded-3xl shadow-md p-4 mb-4 animate-fade-in-up">
-        <h2 className="text-2xl font-semibold text-indigo-600 mb-3">Aperçu des événements</h2>
-        <ul className="space-y-3">
-          {data.length === 0 ? (
-            <li className="text-gray-400 italic">Aucun événement pour l'instant...</li>
-          ) : (
-            data.map((item) => (
-              <li key={item.id} className="p-3 bg-gray-100 rounded-2xl shadow-sm flex items-center gap-3 hover:bg-gray-200 transition-colors">
-                <span className="w-3 h-3 bg-indigo-500 rounded-full animate-pulse"></span>
-                <span className="font-medium text-gray-700">{item.nom}</span>
-              </li>
-            ))
-          )}
-        </ul>
-      </section>
-
-      {/* Animations */}
-      <style>{`
-        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes fade-in-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes bounce-in { 0% { transform: scale(0.8); opacity: 0; } 60% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
-        @keyframes pop-in { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        @keyframes slide-in { from { transform: translateY(-16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .animate-fade-in { animation: fade-in 1s ease; }
-        .animate-fade-in-fast { animation: fade-in 0.3s ease; }
-        .animate-fade-in-up { animation: fade-in-up 1s 0.2s both; }
-        .animate-bounce-in { animation: bounce-in 0.8s 0.1s both; }
-        .animate-pop-in { animation: pop-in 0.7s 0.4s both; }
-        .animate-slide-in { animation: slide-in 1s 0.3s both; }
-      `}</style>
-    </main>
+          @keyframes slide-in {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+          }
+          .animate-slide-in { animation: slide-in 0.6s ease-out; }
+        `}</style>
+      </div>
+    </Layout>
   );
 }
