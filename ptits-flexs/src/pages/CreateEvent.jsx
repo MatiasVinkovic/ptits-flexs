@@ -8,7 +8,8 @@ import Layout from "@/components/Layout";
 
 const CreateEventPage = () => {
   const [title, setTitle] = useState("");
-  const [date, setDate] = useState(""); // date est une string YYYY-MM-DD
+  const [date, setDate] = useState(""); // dateDebut
+  const [endDate, setEndDate] = useState(""); // dateFin
   const [time, setTime] = useState("");
   const [description, setDescription] = useState("");
 
@@ -19,6 +20,7 @@ const CreateEventPage = () => {
       {
         nom: title,
         dateDebut: date,
+        dateFin: endDate,
         heure: time,
         lieu: description || "Non spécifié"
       }
@@ -31,6 +33,7 @@ const CreateEventPage = () => {
       alert("Événement créé !");
       setTitle("");
       setDate("");
+      setEndDate("");
       setTime("");
       setDescription("");
     }
@@ -60,7 +63,14 @@ const CreateEventPage = () => {
             <Calendar
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              label="Date"
+              label="Date de début"
+            />
+          </div>
+          <div>
+            <Calendar
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              label="Date de fin"
             />
           </div>
           <div>

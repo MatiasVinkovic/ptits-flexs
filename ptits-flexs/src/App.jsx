@@ -7,6 +7,7 @@ import LoginPage from "./pages/LoginPage";
 import AccountPage from "./pages/AccountPage";
 import RemboursementPage from "./pages/RemboursementPage";
 import AnnuairePage from "./pages/AnnuairePage";
+import JeuPage from "./pages/JeuPage";
 
 
 function App() {
@@ -24,6 +25,9 @@ function App() {
         <Route path="/remboursement" element={<RemboursementPage />} />
 
         <Route path="/annuaire" element={<AnnuairePage />} />
+
+        <Route path="/jeu" element={<JeuPage />} />
+
 
 
 

@@ -66,7 +66,13 @@ export default function EventPage() {
                         <div className="mt-3 text-sm text-gray-600 space-y-1 animate-fade-in-up">
                           <p>
                             <strong>Date :</strong>{" "}
-                            {format(parseISO(event.dateDebut), "PPP", { locale: fr })}
+                            {format(parseISO(event.dateDebut), "PPP", { locale: fr })}{" "}
+                            {event.dateFin && event.dateFin !== event.dateDebut && (
+                              <>
+                                {"→ "}
+                                {format(parseISO(event.dateFin), "PPP", { locale: fr })}
+                              </>
+                            )}
                           </p>
                           <p>
                             <strong>Heure :</strong> {event.heure}

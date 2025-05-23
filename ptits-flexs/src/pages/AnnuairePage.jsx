@@ -3,6 +3,8 @@ import { supabase } from "@/lib/supabaseClient";
 import { Phone } from "lucide-react";
 import { motion } from "framer-motion";
 
+import Layout from "@/components/Layout";
+
 export default function AnnuairePage() {
   const [annuaire, setAnnuaire] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -38,6 +40,7 @@ export default function AnnuairePage() {
 
   return (
     <main className="min-h-screen p-6 bg-gray-100">
+      <Layout>
       <div className="max-w-xl mx-auto bg-white rounded-2xl shadow-lg p-6">
         <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">
           📒 Annuaire
@@ -71,6 +74,7 @@ export default function AnnuairePage() {
           <p className="text-center text-sm text-red-500 mt-4">{message}</p>
         )}
       </div>
+      </Layout>
     </main>
   );
 }

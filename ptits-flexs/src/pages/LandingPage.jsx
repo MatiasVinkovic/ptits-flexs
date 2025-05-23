@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabaseClient";
 import Layout from "@/components/Layout";
 import { format, parseISO, isAfter } from "date-fns";
 import { fr } from "date-fns/locale";
+import { AnimatedNumber } from "@/components/personal-ui/AnimatedNumber";
 
 export default function LandingPage() {
   const [userName, setUserName] = useState(null);
@@ -59,9 +60,12 @@ export default function LandingPage() {
     <Layout>
       <div className="space-y-8 animate-fade-in">
         <header className="text-center py-8">
-          <h1 className="text-5xl font-extrabold text-indigo-700 animate-bounce-in">
-            Ptits Flexs
-          </h1>
+         <h1
+  className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-pink-500 to-yellow-500 animate-text-glow-float animate-float"
+  style={{ fontFamily: "'Cal Sans', 'Acme', 'Ancizar Serif', sans-serif" }}
+>
+  Flex App
+</h1>
           <p className="text-lg text-gray-600 mt-2 animate-slide-in">
             Nathéo n'aura plus aucune excuse
           </p>
@@ -71,19 +75,22 @@ export default function LandingPage() {
           <div className="text-center">
             <h2 className="text-xl font-semibold">Bienvenue {userName} 👋</h2>
             <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-center items-center">
-              <div className="rounded-full bg-green-100 border border-green-400 px-4 py-2 shadow text-green-700 flex flex-col items-center min-w-[110px]">
-                <span className="font-semibold text-xs">On te doit</span>
-                <span className="text-lg font-bold">{totalMeDoit.toFixed(2)} €</span>
-              </div>
-              <div className="rounded-full bg-red-100 border border-red-400 px-4 py-2 shadow text-red-700 flex flex-col items-center min-w-[110px]">
+            <div className="rounded-full bg-green-100 border border-green-400 px-4 py-2 shadow text-green-700 flex flex-col items-center min-w-[110px] animate-fade-in-up">                
+              <span className="font-semibold text-xs">On te doit</span>
+                <AnimatedNumber value={totalMeDoit} className="text-lg font-bold" />
+            </div>
+
+              <div className="rounded-full bg-red-100 border border-red-400 px-4 py-2 shadow text-red-700 flex flex-col items-center min-w-[110px] animate-fade-in-up">
                 <span className="font-semibold text-xs">Tu dois</span>
-                <span className="text-lg font-bold">{totalJeDois.toFixed(2)} €</span>
+                <span className="text-lg font-bold">
+                <AnimatedNumber value={totalJeDois} />
+              </span>
               </div>
             </div>
-            <div className="mt-2">
+            <div className="mt-2 animate-fade-in-up">
               <p className="text-lg font-bold">
-                Solde net : {(totalMeDoit - totalJeDois).toFixed(2)} €
-              </p>
+          Solde net : <AnimatedNumber value={totalMeDoit - totalJeDois} />
+        </p>
             </div>
           </div>
         )}
@@ -117,6 +124,16 @@ export default function LandingPage() {
           }
           .animate-fade-in { animation: fade-in 0.5s ease-out; }
 
+          @keyframes float {
+            0%   { transform: translateY(0); }
+            50%  { transform: translateY(-8px); }
+            100% { transform: translateY(0); }
+          }
+
+          .animate-float {
+            animation: float 3s ease-in-out infinite;
+          }
+
           @keyframes fade-in-up {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
@@ -135,6 +152,52 @@ export default function LandingPage() {
             to { transform: translateY(0); opacity: 1; }
           }
           .animate-slide-in { animation: slide-in 0.6s ease-out; }
+
+          @keyframes text-glow {
+          0%, 100% {
+            filter: brightness(1);
+          }
+          50% {
+            filter: brightness(1.3);
+          }
+        }
+        .animate-text-glow {
+          animation: text-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes fade-glow {
+      0%, 100% {
+        opacity: 1;
+        text-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+      }
+      50% {
+        opacity: 0.9;
+        text-shadow: 0 0 25px rgba(99, 102, 241, 0.7);
+      }
+    }
+    .animate-fade-glow {
+      animation: fade-glow 3s ease-in-out infinite;
+    }
+
+    @keyframes flicker {
+  0%, 100% { opacity: 1; }
+  40% { opacity: 0.8; }
+  50% { opacity: 0.3; }
+  60% { opacity: 1; }
+  70% { opacity: 0.7; }
+}
+.animate-flicker {
+  animation: flicker 2.5s infinite;
+}
+
+@keyframes bounce-scale {
+  0% { transform: scale(0.95) translateY(0); }
+  50% { transform: scale(1.05) translateY(-5px); }
+  100% { transform: scale(1) translateY(0); }
+}
+.animate-bounce-scale {
+  animation: bounce-scale 2s ease-in-out infinite;
+}
         `}</style>
       </div>
     </Layout>
