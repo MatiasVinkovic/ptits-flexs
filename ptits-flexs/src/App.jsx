@@ -8,6 +8,8 @@ import AccountPage from "./pages/AccountPage";
 import RemboursementPage from "./pages/RemboursementPage";
 import AnnuairePage from "./pages/AnnuairePage";
 import JeuPage from "./pages/JeuPage";
+import TimerPage from "./pages/TimerPage";
+import { Timer } from "lucide-react";
 
 
 function App() {
@@ -27,6 +29,9 @@ function App() {
         <Route path="/annuaire" element={<AnnuairePage />} />
 
         <Route path="/jeu" element={<JeuPage />} />
+
+        <Route path="/timer" element={<TimerPage />} />
+
 
 
 

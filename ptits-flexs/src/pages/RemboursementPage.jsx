@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import Layout from "@/components/Layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
+import { Checkbox } from "@/components/ui/checkbox"
 
 
 
@@ -119,6 +119,7 @@ export default function RemboursementPage() {
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="mode1">Une personne</TabsTrigger>
               <TabsTrigger value="mode2">Split</TabsTrigger>
+              
             </TabsList>
           </div>
       <TabsContent value="mode1">
@@ -242,11 +243,10 @@ export default function RemboursementPage() {
           <div className="grid grid-cols-2 gap-2">
             {users.map((u) => (
               <label key={u.id} className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={description.includes(u.id)}
-                  onChange={(e) => {
-                    if (e.target.checked) {
+                  onCheckedChange={(checked) => {
+                    if (checked) {
                       setDescription([...description, u.id]);
                     } else {
                       setDescription(description.filter((id) => id !== u.id));
