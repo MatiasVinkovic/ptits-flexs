@@ -67,7 +67,7 @@ export default function LandingPage() {
   Flex App
 </h1>
           <p className="text-lg text-gray-600 mt-2 animate-slide-in">
-            Nathéo n'aura plus aucune excuse
+            Joris passe en L3
           </p>
         </header>
 
